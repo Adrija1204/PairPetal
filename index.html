@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>PairPetal</title>
+<style>
+body { 
+    background: url(pic5.jpeg); 
+    color: white; 
+    font-family: Arial; 
+    height: 100vh; 
+    margin: 0; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+.box { 
+    border: 5px solid white; 
+    padding: 50px; 
+    border-radius: 30px; 
+    width: 500px; 
+    text-align: center; 
+}
+input, select { 
+    margin: 10px 10px 10px 0; 
+    padding: 10px; 
+    width: 100%; 
+}
+button { 
+    margin-top: 10px; 
+    padding: 10px; 
+    background-color: rgb(222, 163, 163); 
+    color: rgb(25, 1, 1); 
+    border: none; 
+    cursor: pointer; 
+    width: 100%; 
+}
+button:hover { 
+    background-color: gray; 
+    color: white; 
+}
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 20px; 
+}
+th, td { 
+    border: 1px solid white; 
+    padding: 8px; 
+    text-align: center; 
+}
+th { 
+    background-color: gray; 
+}
+.logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 5px;
+}
+</style>
+</head>
+<body>
+<div class="box">
+<img src="logo1.jpeg" class="logo"> 
+<h1> PairPetal </h1>
+<h2><i>Compare stock charts for similar patterns</i></h2>
+<input type="text" id="asset" placeholder="Asset Symbol e.g. AAPL, NIFTY">
+<select id="timeframe">
+    <option value="1m">1 Minute</option>
+    <option value="3m">3 Minutes</option>
+    <option value="5m">5 Minutes</option>
+    <option value="10m">10 Minutes</option>
+    <option value="15m">15 Minutes</option>
+    <option value="20m">20 Minutes</option>
+    <option value="30m">30 Minutes</option>
+    <option value="45m">45 Minutes</option>
+    <option value="60m">1 Hour</option>
+    <option value="180m">3 Hours</option>
+    <option value="360m">6 Hours</option>
+    <option value="1d">1 Day</option>
+    <option value="1wk">1 Week</option>
+    <option value="1mo">1 Month</option>
+</select>
+<input type="date" id="start_date">
+<input type="date" id="end_date">
+<button onclick="compareCharts()">Compare</button>
+
+<div id="results"></div>
+</div>
+
+<script>
+function compareCharts() {
+    const asset = document.getElementById('asset').value;
+    const timeframe = document.getElementById('timeframe').value;
+    const start_date = document.getElementById('start_date').value;
+    const end_date = document.getElementById('end_date').value;
+
+    fetch('http://127.0.0.1:5000/compare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ asset, timeframe, start_date, end_date })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.error){
+            document.getElementById('results').innerHTML = "<p style='color:red'>" + data.error + "</p>";
+            return;
+        }
+        let html = "<table><tr><th>Asset</th><th>Similarity %</th></tr>";
+        data.results.forEach(r => {
+            html += "<tr><td>" + r.asset + "</td><td>" + r.similarity.toFixed(2) + "%</td></tr>";
+        });
+        html += "</table>";
+        document.getElementById('results').innerHTML = html;
+    })
+    .catch(err => console.error(err));
+}
+</script>
+</body>
+</html>
